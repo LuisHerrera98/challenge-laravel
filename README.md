@@ -1,7 +1,8 @@
-1-correr las migraciones 
+1-composer install
+2-correr las migraciones 
 
  php artisan migrate
 
-2-Correr el back
+3-Correr el back
 
  php artisan serve
