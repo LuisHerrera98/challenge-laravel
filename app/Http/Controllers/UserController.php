@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\Address;
 use App\Models\Company;
 use Illuminate\Http\Request;
+use PhpParser\Node\Stmt\TryCatch;
 
 class UserController extends Controller
 {
@@ -16,9 +17,6 @@ class UserController extends Controller
 
     public function createUser(Request $request)
     {
-        $addresId = $this->addAddress($request);
-        $companyId = $this->addCompany($request);
-
         $request->validate([
             'name' => 'required',
             'username' => 'required',
@@ -27,18 +25,27 @@ class UserController extends Controller
             'website' => 'required|min:1',
         ]);
 
-        $user = new User;
-        $user->name = $request->name;
-        $user->username = $request->username;
-        $user->email = $request->email;
-        $user->address = $addresId;
-        $user->phone = $request->phone;
-        $user->website = $request->website;
-        $user->company = $companyId;
-        $user->save();
+        try {
+            $addresId = $this->addAddress($request);
+            $companyId = $this->addCompany($request);
+
+            $user = new User;
+            $user->name = $request->name;
+            $user->username = $request->username;
+            $user->email = $request->email;
+            $user->address = $addresId;
+            $user->phone = $request->phone;
+            $user->website = $request->website;
+            $user->company = $companyId;
+            $user->save();
+            return 'User Created';
+        } catch (\Throwable $th) {
+            throw $th;
+        }
     }
 
-    public function addAddress($request){
+    public function addAddress($request)
+    {
         $request->validate([
             'street' => 'required',
             'suite' => 'required',
@@ -53,36 +60,45 @@ class UserController extends Controller
             "lng" => $request->lng
         );
         $geoJson = json_encode($geo);
-        
-        $address = new Address();
-        $address->street = $request->street;
-        $address->suite = $request->suite;
-        $address->city = $request->city;
-        $address->zipcode = $request->zipcode;
-        $address->geo = $geoJson;
-        $address->save();
 
-        return $address->id;
+        try {
+            $address = new Address();
+            $address->street = $request->street;
+            $address->suite = $request->suite;
+            $address->city = $request->city;
+            $address->zipcode = $request->zipcode;
+            $address->geo = $geoJson;
+            $address->save();
+
+            return $address->id;
+        } catch (\Throwable $th) {
+            throw $th;
+        }
     }
 
-    public function addCompany($request){
+    public function addCompany($request)
+    {
         $request->validate([
             'name' => 'required',
             'catchPhrase' => 'required',
             'bs' => 'required',
         ]);
 
-        $company = new Company();
-        $company->name = $request->name;
-        $company->catchPhrase = $request->catchPhrase;
-        $company->bs = $request->bs;
-        $company->save();
+        try {
+            $company = new Company();
+            $company->name = $request->name;
+            $company->catchPhrase = $request->catchPhrase;
+            $company->bs = $request->bs;
+            $company->save();
 
-        return $company->id;
-
+            return $company->id;
+        } catch (\Throwable $th) {
+            throw $th;
+        }
     }
 
-    public function getUserCount(){
+    public function getUserCount()
+    {
         return User::all()->count();
     }
 }
